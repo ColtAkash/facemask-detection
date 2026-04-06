@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Camera, CameraOff, Zap, Info } from 'lucide-react'
+import { Camera, CameraOff, Info } from 'lucide-react'
 
 const BASE = import.meta.env.BASE_URL
 const MODEL_PATH = `${BASE}model/model.onnx`
@@ -35,47 +35,82 @@ export default function WebcamPage() {
   const [fps,        setFps]        = useState(0)
   const [avgMs,      setAvgMs]      = useState(0)
   const [stats,      setStats]      = useState({ frames: 0, wm: 0, nm: 0, inc: 0, totalMs: 0 })
-  const [interval,   setInterval_]  = useState(100)
-  const [inputName,  setInputName]  = useState('input_layer_5')
+  const [intervalMs, setIntervalMs] = useState(100)
 
   const fpsRef   = useRef({ count: 0, last: performance.now() })
   const msRef    = useRef({ total: 0, frames: 0 })
 
   // ── Load ORT + model ───────────────────────────────────────
   useEffect(() => {
+    let cancelled = false
     ;(async () => {
       try {
         setLoadMsg('Loading ONNX Runtime…')
-        setLoadPct(15)
+        setLoadPct(10)
         const ort = await import('onnxruntime-web')
-        ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/'
+        if (cancelled) return
+
+        // Serve WASM from same origin (avoids version mismatch + CORS).
+        // Force single-threaded WASM (GitHub Pages doesn't set COOP/COEP for SharedArrayBuffer).
+        ort.env.wasm.wasmPaths = `${BASE}ort/`
+        ort.env.wasm.numThreads = 1
+        ort.env.wasm.proxy = false
 
         setLoadMsg('Downloading model (9.9 MB)…')
-        setLoadPct(35)
-        const session = await ort.InferenceSession.create(MODEL_PATH, {
+        setLoadPct(30)
+
+        // Fetch model as ArrayBuffer with progress tracking
+        const resp = await fetch(MODEL_PATH)
+        if (!resp.ok) throw new Error(`Model fetch failed: HTTP ${resp.status}`)
+        const total  = +(resp.headers.get('content-length') || 0)
+        const reader = resp.body.getReader()
+        const chunks = []
+        let received = 0
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value)
+          received += value.length
+          if (total) setLoadPct(30 + Math.round((received / total) * 50))
+        }
+        if (cancelled) return
+        const buf = new Uint8Array(received)
+        let offset = 0
+        for (const c of chunks) { buf.set(c, offset); offset += c.length }
+
+        setLoadMsg('Initializing model…')
+        setLoadPct(85)
+        const session = await ort.InferenceSession.create(buf.buffer, {
           executionProviders: ['wasm'],
           graphOptimizationLevel: 'all',
         })
-        setLoadPct(75)
+        if (cancelled) return
 
         const iname = session.inputNames?.[0] ?? 'input_layer_5'
-        setInputName(iname)
 
         // Warm-up
         setLoadMsg('Warming up…')
-        const dummy = new ort.Tensor('float32', new Float32Array(1 * IMG_SIZE * IMG_SIZE * 3), [1, IMG_SIZE, IMG_SIZE, 3])
+        setLoadPct(95)
+        const dummy = new ort.Tensor(
+          'float32',
+          new Float32Array(1 * IMG_SIZE * IMG_SIZE * 3),
+          [1, IMG_SIZE, IMG_SIZE, 3]
+        )
         await session.run({ [iname]: dummy })
+        if (cancelled) return
 
         ortRef.current = { session, ort, iname }
         setLoadPct(100)
         setModelState('ready')
         setLoadMsg('Model ready')
       } catch (err) {
-        console.error(err)
+        console.error('[Webcam] Model load failed:', err)
+        if (cancelled) return
         setModelState('error')
-        setLoadMsg(String(err.message ?? err).slice(0, 120))
+        setLoadMsg(String(err.message ?? err).slice(0, 140))
       }
     })()
+    return () => { cancelled = true }
   }, [])
 
   // ── Inference loop ─────────────────────────────────────────
@@ -141,7 +176,7 @@ export default function WebcamPage() {
       setStats({ frames: 0, wm: 0, nm: 0, inc: 0, totalMs: 0 })
       msRef.current = { total: 0, frames: 0 }
       fpsRef.current = { count: 0, last: performance.now() }
-      timerRef.current = setInterval(runInference, interval)
+      timerRef.current = setInterval(runInference, intervalMs)
     } catch (err) {
       alert(err.name === 'NotAllowedError' ? 'Camera permission denied.' : 'Camera error: ' + err.message)
     }
@@ -160,9 +195,9 @@ export default function WebcamPage() {
   useEffect(() => {
     if (running) {
       clearInterval(timerRef.current)
-      timerRef.current = setInterval(runInference, interval)
+      timerRef.current = setInterval(runInference, intervalMs)
     }
-  }, [interval, running, runInference])
+  }, [intervalMs, running, runInference])
 
   useEffect(() => () => { clearInterval(timerRef.current); stopCamera() }, [])
 
@@ -306,8 +341,8 @@ export default function WebcamPage() {
             </motion.button>
 
             <select
-              value={interval}
-              onChange={e => setInterval_(+e.target.value)}
+              value={intervalMs}
+              onChange={e => setIntervalMs(+e.target.value)}
               className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white/70 focus:outline-none"
             >
               <option value={200}>5 fps</option>
