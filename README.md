@@ -9,12 +9,12 @@ web app with live webcam inference.
 
 | # | Name | Responsibility |
 |---|------|-----------------|
-| 1 | Member 1 | Data preprocessing, shared training utilities |
-| 2 | Member 2 | Experiment 1 — Custom CNN architectures |
-| 3 | Member 3 | Experiment 2 — MobileNetV2 / VGG16 transfer learning |
-| 4 | Member 4 | Experiment 3 — EfficientNet + ViT, comparison plots |
-| 5 | Member 5 | Inference pipeline + FastAPI backend |
-| 6 | Akash   | Colab training runner, frontend integration, repo scaffold |
+| 1 | Akash Sukumaran | Experiment 3 (EfficientNetB0 scratch + pre-trained, Vision Transformer), FastAPI backend, shared training utilities (`utils.py`), Colab training pipeline |
+| 2 | Drake           | Experiment 3 co-lead (EfficientNet fine-tuning, ViT implementation support) |
+| 3 | Norman          | Experiment 1 — custom CNN architectures, hyper-parameter sweep, analysis |
+| 4 | Rui Sun         | Experiment 2 — MobileNetV2 feature extraction and fine-tuning, VGG16 baseline, t-SNE visualisation |
+| 5 | Rukaiya         | React webcam frontend, UI integration |
+| 6 | Adorn Shaju     | Dataset preprocessing pipeline (Pascal-VOC parsing, stratified cropping, train/val/test splitting) |
 
 ## Repository Layout
 
