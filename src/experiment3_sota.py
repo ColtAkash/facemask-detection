@@ -8,7 +8,6 @@ Dataset: andrewmvd/face-mask-detection (3 classes)
   Model A - EfficientNetB0  from scratch          (random init)
   Model B - EfficientNetB0  ImageNet pre-trained  (phase 1 head -> phase 2 fine-tune)
   Model C - Custom Vision Transformer             (patch-based ViT, no deps)
-  Model D - ViT-B16 via TF-Hub                   (if tensorflow_hub installed)
 
 Usage:
     python src/experiment3_sota.py [--data_dir DATASET_PATH] [--skip_vit]
@@ -92,12 +91,11 @@ def load_datasets(data_dir, preprocess_fn, img_size=None):
 # --- EfficientNetB0 -----------------------------------------------------------
 
 def _eff_head(x):
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Dense(256, activation='relu')(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    return tf.keras.layers.Dense(NUM_CLASSES, activation='softmax', dtype='float32')(x)
-
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)       # flatten features
+    x = tf.keras.layers.BatchNormalization()(x)           # stabilize
+    x = tf.keras.layers.Dense(256, activation='relu')(x)  # learn patterns
+    x = tf.keras.layers.Dropout(0.4)(x)                   # prevent overfitting
+    return tf.keras.layers.Dense(NUM_CLASSES, activation='softmax', dtype='float32')(x)  # 3-class output
 
 def build_efficientnet_scratch():
     base = tf.keras.applications.EfficientNetB0(
