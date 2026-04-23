@@ -1,0 +1,26 @@
+{
+    "MobileNetV2_FeatureExtraction": {
+        "accuracy": 0.9104234527687296,
+        "f1_score": 0.9026470073515217,
+        "precision": 0.9018609922225381,
+        "recall": 0.9104234527687296,
+        "training_time_s": 129.0,
+        "strategy": "MobileNetV2_FE"
+    },
+    "MobileNetV2_FineTuned": {
+        "accuracy": 0.9136807817589576,
+        "f1_score": 0.9062619403860304,
+        "precision": 0.9109879848634744,
+        "recall": 0.9136807817589576,
+        "training_time_s": 107.8,
+        "strategy": "MobileNetV2_FT"
+    },
+    "VGG16_FeatureExtraction": {
+        "accuracy": 0.8925081433224755,
+        "f1_score": 0.8807004229583081,
+        "precision": 0.8838502300686253,
+        "recall": 0.8925081433224755,
+        "training_time_s": 139.0,
+        "strategy": "VGG16_FE"
+    }
+}

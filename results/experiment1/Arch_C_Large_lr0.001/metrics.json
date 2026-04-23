@@ -1,0 +1,10 @@
+{
+    "accuracy": 0.8908794788273615,
+    "f1_score": 0.8751805784379074,
+    "precision": 0.860954147874928,
+    "recall": 0.8908794788273615,
+    "training_time_s": 85.9,
+    "params": 1373731,
+    "learning_rate": 0.001,
+    "architecture": "Arch_C_Large"
+}

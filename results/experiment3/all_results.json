@@ -1,0 +1,26 @@
+{
+    "EfficientNetB0_Scratch": {
+        "accuracy": 0.9055374592833876,
+        "f1_score": 0.8903087565316712,
+        "precision": 0.9073639323809194,
+        "recall": 0.9055374592833876,
+        "training_time_s": 549.0,
+        "model": "EfficientNetB0_Scratch"
+    },
+    "EfficientNetB0_Pretrained": {
+        "accuracy": 0.9071661237785016,
+        "f1_score": 0.9040222833100078,
+        "precision": 0.9022074063020067,
+        "recall": 0.9071661237785016,
+        "training_time_s": 153.4,
+        "model": "EfficientNetB0_Pretrained"
+    },
+    "CustomViT": {
+        "accuracy": 0.7915309446254072,
+        "f1_score": 0.6994255256144507,
+        "precision": 0.6265212362995894,
+        "recall": 0.7915309446254072,
+        "training_time_s": 77.3,
+        "model": "CustomViT"
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "accuracy": 0.9136807817589576,
+    "f1_score": 0.9062619403860304,
+    "precision": 0.9109879848634744,
+    "recall": 0.9136807817589576,
+    "training_time_s": 107.8,
+    "strategy": "MobileNetV2_FT"
+}

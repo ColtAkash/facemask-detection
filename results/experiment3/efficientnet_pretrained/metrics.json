@@ -1,0 +1,8 @@
+{
+    "accuracy": 0.9071661237785016,
+    "f1_score": 0.9040222833100078,
+    "precision": 0.9022074063020067,
+    "recall": 0.9071661237785016,
+    "training_time_s": 153.4,
+    "model": "EfficientNetB0_Pretrained"
+}

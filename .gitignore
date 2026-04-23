@@ -22,7 +22,6 @@ env/
 # ------------------------------------------------------------------
 dataset/
 dataset_processed/
-results/
 *.keras
 *.h5
 *.onnx
